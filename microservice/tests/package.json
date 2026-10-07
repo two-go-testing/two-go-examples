@@ -3,6 +3,6 @@
   "private": true,
   "type": "module",
   "devDependencies": {
-    "two-go": "^1.0.0"
+    "two-go": "^2.0.0"
   }
 }

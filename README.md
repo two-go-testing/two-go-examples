@@ -1,6 +1,6 @@
 # two-go-examples
 
-Runnable examples for [two-go](https://github.com/tugkanboz/two-go), the
+Runnable examples for [two-go](https://github.com/two-go-testing/two-go), the
 zero-dependency API testing library.
 
 Each folder is self contained. Install two-go and run.
@@ -9,7 +9,7 @@ Each folder is self contained. Install two-go and run.
 | ------- | ------------- |
 | [basic](./basic) | Write a suite in a `*.twogo.mjs` file and run it with the built-in CLI. |
 | [node-test](./node-test) | Use two-go inside the Node test runner (`node --test`). |
-| [bdd](./bdd) | BDD style scenarios (given/when/then) over a user service, with success, validation, and edge cases. |
+| [bdd](./bdd) | BDD style scenarios (Given/When/Then) over a user service, with success, validation, and edge cases. |
 | [ecommerce-bdd](./ecommerce-bdd) | A fuller BDD suite (20 scenarios) over a shop API: auth, cart, checkout, orders, addresses. |
 | [cucumber](./cucumber) | Real Gherkin `.feature` files run with cucumber-js, with two-go in the step definitions. |
 | [contract](./contract) | Contract and regression testing: explicit schema, inferred schema, and snapshots. |

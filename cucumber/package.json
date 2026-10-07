@@ -8,6 +8,6 @@
   },
   "devDependencies": {
     "@cucumber/cucumber": "^11.0.0",
-    "two-go": "^1.0.0"
+    "two-go": "^2.0.0"
   }
 }

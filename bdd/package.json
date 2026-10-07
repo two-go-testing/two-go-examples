@@ -6,6 +6,6 @@
     "test": "node --test"
   },
   "devDependencies": {
-    "two-go": "^1.1.0"
+    "two-go": "^2.0.0"
   }
 }

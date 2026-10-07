@@ -9,6 +9,6 @@
   },
   "devDependencies": {
     "mocha": "^10.4.0",
-    "two-go": "^1.0.0"
+    "two-go": "^2.0.0"
   }
 }
