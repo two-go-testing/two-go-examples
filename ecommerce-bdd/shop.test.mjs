@@ -3,10 +3,10 @@
 // in user register and log in a fresh account so they stay independent.
 import { test, before, after } from "node:test";
 import { go } from "two-go";
-import { scenario as makeScenario, given, when, then, and } from "two-go/bdd";
+import { scenario as makeScenario, Given, When, Then, And } from "two-go/bdd";
 import { createServer } from "./service/server.js";
 
-// Grouping sugar over two-go/bdd: given/when/then/and and scenario() come from
+// Grouping sugar over two-go/bdd: Given/When/Then/And and scenario() come from
 // the package; feature() just registers each scenario as a node:test test named
 // "Feature: scenario".
 let currentFeature = null;
@@ -45,240 +45,240 @@ async function loginFreshUser(w) {
 
 feature("Login", () => {
   scenario("valid username and password logs in", [
-    given("the user is on the login page", () => {}),
-    when("the user enters valid username and password", async (w) => {
+    Given("the user is on the login page", () => {}),
+    When("the user enters valid username and password", async (w) => {
       w.res = await client().post("/login").json({ email: "demo@example.com", password: "Secret123" });
     }),
-    then("the user should be logged in successfully", (w) => w.res.expectStatus(200)),
-    and("a session token is returned", (w) => w.res.expectValue("token").toBeType("string")),
+    Then("the user should be logged in successfully", (w) => w.res.expectStatus(200)),
+    And("a session token is returned", (w) => w.res.expectValue("token").toBeType("string")),
   ]);
 
   scenario("an invalid password is rejected", [
-    given("the user is on the login page", () => {}),
-    when("the user enters an invalid password", async (w) => {
+    Given("the user is on the login page", () => {}),
+    When("the user enters an invalid password", async (w) => {
       w.res = await client().post("/login").json({ email: "demo@example.com", password: "wrong" });
     }),
-    then("an error message should be displayed", (w) =>
+    Then("an error message should be displayed", (w) =>
       w.res.expectStatus(401).expectJson("error", /invalid/i)),
   ]);
 });
 
 feature("Profile", () => {
   scenario("shows the logged in user information", [
-    given("the user is logged into the system", (w) => loginFreshUser(w)),
-    when("the user opens the profile page", async (w) => {
+    Given("the user is logged into the system", (w) => loginFreshUser(w)),
+    When("the user opens the profile page", async (w) => {
       w.res = await client().get("/profile").bearer(w.token);
     }),
-    then("the user information should be displayed correctly", (w) =>
+    Then("the user information should be displayed correctly", (w) =>
       w.res.expectStatus(200).expectJson("email", w.email)),
   ]);
 });
 
 feature("Products", () => {
   scenario("search lists matching products", [
-    given("the user is on the product listing page", () => {}),
-    when("the user searches for a product", async (w) => {
+    Given("the user is on the product listing page", () => {}),
+    When("the user searches for a product", async (w) => {
       w.res = await client().get("/products").query({ search: "Mouse" });
     }),
-    then("matching products should be listed", (w) =>
+    Then("matching products should be listed", (w) =>
       w.res.expectStatus(200).expectJson("data[0].name", /mouse/i)),
   ]);
 });
 
 feature("Cart", () => {
   scenario("adding a product shows it in the cart", [
-    given("the user is on the product detail page", async (w) => {
+    Given("the user is on the product detail page", async (w) => {
       await loginFreshUser(w);
       await client().get("/products/1").expectStatus(200);
     }),
-    when("the user adds the product to the cart", async (w) => {
+    When("the user adds the product to the cart", async (w) => {
       w.res = await client().post("/cart/items").bearer(w.token).json({ productId: 1 });
     }),
-    then("the product should be displayed in the cart", (w) =>
+    Then("the product should be displayed in the cart", (w) =>
       w.res.expectStatus(201).expectJson("items[0].productId", 1)),
   ]);
 
   scenario("the cart total is calculated correctly", [
-    given("the user has a product in the cart", async (w) => {
+    Given("the user has a product in the cart", async (w) => {
       await loginFreshUser(w);
       await client().post("/cart/items").bearer(w.token).json({ productId: 1, quantity: 2 }).expectStatus(201);
     }),
-    when("the user opens the cart page", async (w) => {
+    When("the user opens the cart page", async (w) => {
       w.res = await client().get("/cart").bearer(w.token);
     }),
-    then("the cart total should be calculated correctly", (w) =>
+    Then("the cart total should be calculated correctly", (w) =>
       w.res.expectStatus(200).expectJson("total", 50)), // 25 * 2
   ]);
 
   scenario("increasing quantity updates the total", [
-    given("the user has a product in the cart", async (w) => {
+    Given("the user has a product in the cart", async (w) => {
       await loginFreshUser(w);
       await client().post("/cart/items").bearer(w.token).json({ productId: 1, quantity: 1 }).expectStatus(201);
     }),
-    when("the user increases the product quantity", async (w) => {
+    When("the user increases the product quantity", async (w) => {
       w.res = await client().patch("/cart/items/1").bearer(w.token).json({ quantity: 3 });
     }),
-    then("the cart total should be updated", (w) =>
+    Then("the cart total should be updated", (w) =>
       w.res.expectStatus(200).expectJson("total", 75)), // 25 * 3
   ]);
 
   scenario("removing a product takes it out of the cart", [
-    given("the user has a product in the cart", async (w) => {
+    Given("the user has a product in the cart", async (w) => {
       await loginFreshUser(w);
       await client().post("/cart/items").bearer(w.token).json({ productId: 1 }).expectStatus(201);
     }),
-    when("the user removes the product from the cart", async (w) => {
+    When("the user removes the product from the cart", async (w) => {
       await client().delete("/cart/items/1").bearer(w.token).expectStatus(200);
       w.res = await client().get("/cart").bearer(w.token);
     }),
-    then("the product should no longer be displayed in the cart", (w) =>
+    Then("the product should no longer be displayed in the cart", (w) =>
       w.res.expectStatus(200).expectJson("items", [])),
   ]);
 });
 
 feature("Checkout", () => {
   scenario("valid payment completes the order", [
-    given("the user is on the checkout page", async (w) => {
+    Given("the user is on the checkout page", async (w) => {
       await loginFreshUser(w);
       await client().post("/cart/items").bearer(w.token).json({ productId: 3 }).expectStatus(201);
     }),
-    when("the user enters valid payment information", async (w) => {
+    When("the user enters valid payment information", async (w) => {
       w.res = await client().post("/checkout").bearer(w.token)
         .json({ card: { number: "4111111111111111", expiry: "12/29", cvc: "123" } });
     }),
-    then("the payment should be completed successfully", (w) =>
+    Then("the payment should be completed successfully", (w) =>
       w.res.expectStatus(200).expectJson("status", "paid")),
   ]);
 
   scenario("invalid card information is rejected", [
-    given("the user is on the checkout page", async (w) => {
+    Given("the user is on the checkout page", async (w) => {
       await loginFreshUser(w);
       await client().post("/cart/items").bearer(w.token).json({ productId: 3 }).expectStatus(201);
     }),
-    when("the user enters invalid card information", async (w) => {
+    When("the user enters invalid card information", async (w) => {
       w.res = await client().post("/checkout").bearer(w.token)
         .json({ card: { number: "1234", expiry: "12/29", cvc: "1" } });
     }),
-    then("the payment should be rejected", (w) =>
+    Then("the payment should be rejected", (w) =>
       w.res.expectStatus(402).expectJson("error", /rejected/i)),
   ]);
 });
 
 feature("Registration", () => {
   scenario("valid details create a new account", [
-    given("the user is on the registration page", () => {}),
-    when("the user fills all required fields correctly", async (w) => {
+    Given("the user is on the registration page", () => {}),
+    When("the user fills all required fields correctly", async (w) => {
       w.res = await client().post("/register").json({ name: "New", email: uniqueEmail(), password: "Secret123" });
     }),
-    then("a new account should be created", (w) => w.res.expectStatus(201).expectValue("id").toBeGreaterThan(0)),
+    Then("a new account should be created", (w) => w.res.expectStatus(201).expectValue("id").toBeGreaterThan(0)),
   ]);
 
   scenario("empty required fields are rejected", [
-    given("the user is on the registration page", () => {}),
-    when("the user leaves required fields empty", async (w) => {
+    Given("the user is on the registration page", () => {}),
+    When("the user leaves required fields empty", async (w) => {
       w.res = await client().post("/register").json({});
     }),
-    then("validation messages should be displayed", (w) =>
+    Then("validation messages should be displayed", (w) =>
       w.res.expectStatus(400).expectValue("error").toBeType("string")),
   ]);
 });
 
 feature("Logout", () => {
   scenario("logging out redirects to the login page", [
-    given("the user is logged into the system", (w) => loginFreshUser(w)),
-    when("the user logs out", async (w) => {
+    Given("the user is logged into the system", (w) => loginFreshUser(w)),
+    When("the user logs out", async (w) => {
       w.res = await client().post("/logout").bearer(w.token);
     }),
-    then("the user should be redirected to the login page", (w) =>
+    Then("the user should be redirected to the login page", (w) =>
       w.res.expectStatus(200).expectJson("redirectTo", "/login")),
   ]);
 });
 
 feature("Orders", () => {
   scenario("selecting an order shows its details", [
-    given("the user has completed an order", async (w) => {
+    Given("the user has completed an order", async (w) => {
       await loginFreshUser(w);
       await client().post("/cart/items").bearer(w.token).json({ productId: 2 }).expectStatus(201);
       const checkout = await client().post("/checkout").bearer(w.token)
         .json({ card: { number: "4111111111111111", expiry: "12/29", cvc: "123" } });
       w.orderId = checkout.get("orderId");
     }),
-    when("the user selects an order", async (w) => {
+    When("the user selects an order", async (w) => {
       w.res = await client().get(`/orders/${w.orderId}`).bearer(w.token);
     }),
-    then("the order details should be displayed", (w) =>
+    Then("the order details should be displayed", (w) =>
       w.res.expectStatus(200).expectJson("id", w.orderId).expectJson("status", "paid")),
   ]);
 
   scenario("completed orders appear in the order history", [
-    given("the user has completed an order", async (w) => {
+    Given("the user has completed an order", async (w) => {
       await loginFreshUser(w);
       await client().post("/cart/items").bearer(w.token).json({ productId: 2 }).expectStatus(201);
       await client().post("/checkout").bearer(w.token)
         .json({ card: { number: "4111111111111111", expiry: "12/29", cvc: "123" } }).expectStatus(200);
     }),
-    when("the user opens the order history page", async (w) => {
+    When("the user opens the order history page", async (w) => {
       w.res = await client().get("/orders").bearer(w.token);
     }),
-    then("the completed order should be listed", (w) =>
+    Then("the completed order should be listed", (w) =>
       w.res.expectStatus(200).check("has at least one order", (r) => r.get("count") >= 1)),
   ]);
 });
 
 feature("Password reset", () => {
   scenario("a registered email triggers a reset email", [
-    given("the user is on the password reset page", () => {}),
-    when("the user enters a registered email address", async (w) => {
+    Given("the user is on the password reset page", () => {}),
+    When("the user enters a registered email address", async (w) => {
       w.res = await client().post("/password-reset").json({ email: "demo@example.com" });
     }),
-    then("a password reset email should be sent", (w) =>
+    Then("a password reset email should be sent", (w) =>
       w.res.expectStatus(200).expectJson("message", /reset email/i)),
   ]);
 
   scenario("an unregistered email shows a warning", [
-    given("the user is on the password reset page", () => {}),
-    when("the user enters an unregistered email address", async (w) => {
+    Given("the user is on the password reset page", () => {}),
+    When("the user enters an unregistered email address", async (w) => {
       w.res = await client().post("/password-reset").json({ email: "nobody@example.com" });
     }),
-    then("an appropriate warning message should be displayed", (w) =>
+    Then("an appropriate warning message should be displayed", (w) =>
       w.res.expectStatus(404).expectJson("error", /no account/i)),
   ]);
 });
 
 feature("Addresses", () => {
   scenario("a new address is saved", [
-    given("the user is on the address page", (w) => loginFreshUser(w)),
-    when("the user adds a new address", async (w) => {
+    Given("the user is on the address page", (w) => loginFreshUser(w)),
+    When("the user adds a new address", async (w) => {
       w.res = await client().post("/addresses").bearer(w.token).json({ line: "1 Main St", city: "Istanbul" });
     }),
-    then("the address should be saved successfully", (w) =>
+    Then("the address should be saved successfully", (w) =>
       w.res.expectStatus(201).expectJson("city", "Istanbul")),
   ]);
 
   scenario("a saved address is updated", [
-    given("the user has a saved address", async (w) => {
+    Given("the user has a saved address", async (w) => {
       await loginFreshUser(w);
       const created = await client().post("/addresses").bearer(w.token).json({ line: "1 Main St", city: "Istanbul" });
       w.id = created.get("id");
     }),
-    when("the user updates the address information", async (w) => {
+    When("the user updates the address information", async (w) => {
       w.res = await client().patch(`/addresses/${w.id}`).bearer(w.token).json({ city: "Ankara" });
     }),
-    then("the updated address should be displayed", (w) =>
+    Then("the updated address should be displayed", (w) =>
       w.res.expectStatus(200).expectJson("city", "Ankara")),
   ]);
 
   scenario("a saved address is deleted", [
-    given("the user has a saved address", async (w) => {
+    Given("the user has a saved address", async (w) => {
       await loginFreshUser(w);
       const created = await client().post("/addresses").bearer(w.token).json({ line: "1 Main St", city: "Istanbul" });
       w.id = created.get("id");
     }),
-    when("the user deletes the address", async (w) => {
+    When("the user deletes the address", async (w) => {
       await client().delete(`/addresses/${w.id}`).bearer(w.token).expectStatus(204);
       w.res = await client().get("/addresses").bearer(w.token);
     }),
-    then("the address should be removed from the address list", (w) =>
+    Then("the address should be removed from the address list", (w) =>
       w.res.expectStatus(200).check("address is gone", (r) => !r.get("data").some((a) => a.id === w.id))),
   ]);
 });

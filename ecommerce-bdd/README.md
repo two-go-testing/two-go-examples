@@ -34,14 +34,14 @@ npm test          # node --test -> 20 scenarios
 
 ```js
 scenario("the cart total is calculated correctly", [
-  given("the user has a product in the cart", async (w) => {
+  Given("the user has a product in the cart", async (w) => {
     await loginFreshUser(w);
     await api.post("/cart/items").bearer(w.token).json({ productId: 1, quantity: 2 }).expectStatus(201);
   }),
-  when("the user opens the cart page", async (w) => {
+  When("the user opens the cart page", async (w) => {
     w.res = await api.get("/cart").bearer(w.token);
   }),
-  then("the cart total should be calculated correctly", (w) =>
+  Then("the cart total should be calculated correctly", (w) =>
     w.res.expectStatus(200).expectJson("total", 50)),
 ]);
 ```

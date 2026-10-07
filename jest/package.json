@@ -10,6 +10,6 @@
   "devDependencies": {
     "cross-env": "^7.0.3",
     "jest": "^29.7.0",
-    "two-go": "^1.0.0"
+    "two-go": "^2.0.0"
   }
 }

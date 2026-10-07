@@ -1,7 +1,7 @@
 # bdd
 
 BDD style scenarios using two-go's built-in BDD layer, `two-go/bdd`. It gives
-you `feature / scenario / given / when / then`, runner-agnostic, so `scenario()`
+you `feature / scenario / Given / When / Then / And`, runner-agnostic, so `scenario()`
 returns an async function you hand to the Node test runner. two-go's throwing
 assertions are what make each step pass or fail.
 
@@ -29,10 +29,10 @@ npm test          # runs: node --test
 
 ```js
 scenario("creates a user with valid data", [
-  given("a valid user payload", (w) => { w.payload = { name: "Ada", email: "ada@example.com" }; }),
-  when("the user is created", async (w) => { w.res = await api.post("/users").json(w.payload); }),
-  then("the response is 201 Created", (w) => w.res.expectStatus(201)),
-  and("the body echoes the name", (w) => w.res.expectJson("name", "Ada")),
+  Given("a valid user payload", (w) => { w.payload = { name: "Ada", email: "ada@example.com" }; }),
+  When("the user is created", async (w) => { w.res = await api.post("/users").json(w.payload); }),
+  Then("the response is 201 Created", (w) => w.res.expectStatus(201)),
+  And("the body echoes the name", (w) => w.res.expectJson("name", "Ada")),
 ]);
 ```
 
